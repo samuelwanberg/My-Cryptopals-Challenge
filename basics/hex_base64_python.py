@@ -8,43 +8,47 @@ def enum(**enums):
 
 def hex_to_base64(hexdata):
 
-    basehexFinal = []
+    base64Final = []
 
-    #Enumerate all possibilitys of bits
+    #Enumerate all possibilitys of bits padding
     take = enum(ZERO=0, TWO=2, FOUR=4)
 
     #Convert from hexadecimal to decimal
-    decs = [ int(v, 16) for v in hexdata]
+    decs = [ int(h, 16) for h in hexdata]
 
-    sixtets = 0
+    sextets = 0
     padding = take.ZERO
 
     for dec in decs:
 
         if padding == take.ZERO:
-            sixtets = dec
+            sextets = dec
             padding = take.TWO
 
-        elif padding == take.TOW:
-            sixtets = (sixtets << 2) | (dec >> 2)
-            baseHexFinal.append( b64_table[sixtets] )
-            sixtets = (dec >> 2)
+        elif padding == take.TWO:
+            sextets = (sextets << 2) | (dec >> 2)
+            base64Final.append( b64_table[sextets] )
+            sextets = (dec >> 2)
 
         elif padding == take.FOUR:
-            sixtets = (sixtets << 4) | dec
-            baseHexFinal.append( b64_table[sixtets] )
+            sextets = (sextets << 4) | dec
+            base64Final.append( b64_table[sextets] )
             padding = take.ZERO
 
-    if padding == take.TWO:
+        if padding == take.TWO or padding == take.FOUR:
 
-    elif padding == take.FOUR:
+           base64Final.append( {
+                take.TWO: lambda: b64_table[ ( sextets << 2) ] + "="  ,
+                take.FOUR: lambda: b64_table[ ( sextets << 4) ] + "=="
+                } [padding] ()
+           )
 
-    return "".join(baseHexFinal)
+    return "".join(base64Final)
 
 def main_test():
 
-    assert hex_to_base64("49276d206b696c6c696e6720796f757220627261696e206c696b65206120706f69736f6e6f7573206d757368726f6f6d",
-                                 "SSdtIGtpbGxpbmcgeW91ciBicmFpbiBsaWtlIGEgcG9pc29ub3VzIG11c2hyb29t")
+    assert hex_to_base64("49276d206b696c6c696e6720796f757220627261696e206c696b65206120706f69736f6e6f7573206d757368726f6f6d") ==\
+           "SSdtIGtpbGxpbmcgeW91ciBicmFpbiBsaWtlIGEgcG9pc29ub3VzIG11c2hyb29t"
 
 if __name__ == '__main__':
     main_test()
